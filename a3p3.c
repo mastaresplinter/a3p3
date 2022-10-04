@@ -83,7 +83,6 @@ void computePower(int seg)
  */
 void computeExponential(int seg)
 {
-    // char str[32];
     ExpStruct *value;
     int i = 0;
     while (1)
@@ -123,16 +122,28 @@ void toggle_led(int seg)
 
 int main()
 {
-    led_init();
     piface_init();
+    piface_puts("DT8025 - A3P3");
+    RPI_WaitMicroSeconds(2000000);    
     piface_clear();
-
-    piface_puts("DT8025 - A3P1");
-    RPI_WaitMicroSeconds(2000000);
-    piface_clear();
+    led_init();
+    led_toggle();
+    
+    /*
+    * Part 1 of a3p3
     spawn(computePower, 0);
     spawn(computePrimes, 1);
     spawn(computeExponential, 2);
     spawn(computeExponential, 3);
     toggle_led(4);
+    */
+    
+    // Part 2 of a3p3
+    spawn(computePower, 0);
+    spawn(computePower, 1);
+    spawn(computePrimes, 2);
+    spawn(computePrimes, 3);
+    spawn(computeExponential, 4);
+    spawn(computeExponential, 5);
+    toggle_led(6);
 }
