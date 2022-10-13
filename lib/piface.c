@@ -14,8 +14,8 @@
 #include "piface.h"
 
 int cnt;
-uint8_t cur_col = 0; // Column of current line
-uint8_t cur_row = 0;
+volatile uint8_t cur_col = 0; 	// Column of current line
+volatile uint8_t cur_row = 0;	// Row of current line
 
 /* Bit-Banging SPI Driver */
 static void spi_init(void){
@@ -142,7 +142,22 @@ static void lcd_write_data(uint8_t data){
     lcd_pulse( LCD_BL | LCD_RS | (data & 0x0F) );
 	lcd_busy_wait();
 }
-
+ /** @brief Initializes the piface display for instructions
+ * 
+ *  @param void
+ *
+ *	@return void
+ *
+ *  Pre-condition: none
+ * 
+ *  Post-condition: 4-bit mode enabled
+ *  function set; N = 1 for two rows, F = 0 for 5x8 display
+ *  entry mode set; I/D = 1 for direction left to right, S = 0 for shift off 
+ *  display on/off; D = 1 for display on, C = 1 for cursor on; B = 0 for blinking off
+ *  
+ *  properties: 
+ *  After initializing the piface it should be ready for instructions in 4-bit mode.
+ */
 static void lcd_init(void){
 	/* enable 4 bit mode */
 	LCD_DELAY;
@@ -169,11 +184,38 @@ static void lcd_init(void){
 	LCD_DELAY;
 }
 
+static void lcd_init2(void)
+{
+	/* enable 4 bit mode */
+	LCD_DELAY;
+	lcd_pulse(0x03);
+	LCD_DELAY;
+	lcd_pulse(0x03);
+	LCD_DELAY;
+	lcd_pulse(0x03);
+	LCD_DELAY;
+	lcd_pulse(0x02);
+	LCD_DELAY;
+
+	/* function set; N = 1 for two rows, F = 0 for 5x8 display */
+	lcd_write_cmd(0x28);
+	LCD_DELAY;
+	/* display clear */
+	lcd_write_cmd(0x01);
+	LCD_DELAY;
+	/* entry mode set; I/D = 1 for direction left to right, S = 0 for shift off */
+	lcd_write_cmd(0x06);
+	LCD_DELAY;
+	/* display on/off; D = 1 for display on, C = 1 for cursor on; B = 0 for blinking off*/
+	lcd_write_cmd(0x0E);
+	LCD_DELAY;
+}
+
 __attribute__((constructor))
 void piface_init(void){
 	spi_init();
 	mcp_init();
-	lcd_init();
+	lcd_init2();
 	cnt=0;
 }
 
@@ -181,7 +223,16 @@ uint8_t piface_getc(void){
 	return mcp_read(MCP_GPIOA);
 }
 
-/** @brief Writes a character
+ /** @brief Writes a character to the display
+ * 
+ *  @param c is the character being displayed to the screen
+ *
+ *	@return void
+ *
+ *  Pre-condition: If the integer value of c is less than 32 or greater than 126 an error will occur.
+ * 
+ *  Post-condition: none
+ *
  */
 void piface_putc(char c){
 	if (((int)c < 32 || (int)c > 126) && c != '\n')
@@ -202,7 +253,16 @@ void piface_putc(char c){
 	}
 }
 
-/** @brief Writes a string
+ /** @brief Writes a string to the display
+ * 
+ *  @param s is the string to be written to the display
+ *
+ *	@return void
+ *
+ *  Pre-condition: s is not NULL
+ * 
+ *  Post-condition: none
+ *
  */
 void piface_puts(char s[]){
     if (s == NULL)
@@ -219,8 +279,16 @@ void piface_puts(char s[]){
 
 
 /** @brief Clears the display
+ * 
+ *	@return void
+ *
+ *  Pre-condition: none
+ * 
+ *  Post-condition: none
+ *
+ *  properties: 
+ *  After clearing the display the cursor position should return to top left (col = 0, row = 0)
  */
-
 void piface_clear(void) {
 	lcd_write_cmd(0x01);
 	cur_col = 0;

@@ -40,7 +40,7 @@ int is_prime(int i)
         return 0;
     if (i % 2 == 0 && i > 2)
         return 0;                  // Check even numbers
-    for (int j = 3; j < i; j += 2) // Check uneven numbers
+    for (int j = 3; j < i/2; j += 2) // Check uneven numbers
         if (i % j == 0)
             return 0;
     return 1;
@@ -129,15 +129,15 @@ int main()
     led_init();
     led_toggle();
     
-    /*
-    * Part 1 of a3p3
+    
+    // Part 1 of a3p3
     spawn(computePower, 0);
     spawn(computePrimes, 1);
     spawn(computeExponential, 2);
     spawn(computeExponential, 3);
     toggle_led(4);
-    */
     
+    /*
     // Part 2 of a3p3
     spawn(computePower, 0);
     spawn(computePower, 1);
@@ -145,5 +145,5 @@ int main()
     spawn(computePrimes, 3);
     spawn(computeExponential, 4);
     spawn(computeExponential, 5);
-    toggle_led(6);
+    toggle_led(6);*/
 }

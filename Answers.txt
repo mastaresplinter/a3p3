@@ -1,0 +1,6 @@
+Does it work? Create a file called Answers.txt and the explanation for why this new kernel is not working as expected.
+
+The new kernel does not work like the previous one. Here we try to spawn 6 threads which is beyond the limit of threads we have at our disposal. 
+In the initialize function in tinythreads.c,  we initialize 5 threads and set the fifth threads next to point to NULL. Making the fith thread the tail of the linked list.
+In the main, when we spawn the 6th thread we are trying to deqeueu an empty freeQ setting the initialized thread (newp) to NULL. When we try to execute newp->function = function;
+we can't reach a function pointer since newp is NULL. This will create an error and the code will not be executed.
